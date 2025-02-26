@@ -1,7 +1,25 @@
+import "reflect-metadata";
 import express from "express";
-import prisma from "./client"; // ✅ Assure-toi que Prisma est bien importé de `client.ts`
+import { graphqlHTTP } from "express-graphql";
+import cors from "cors";
+import dotenv from "dotenv";
+import { schema } from "./graphql/index";
+
+dotenv.config();
 
 const app = express();
-app.use(express.json());
+app.use(cors());
 
-export { app, prisma };
+app.use(
+  "/graphql",
+  graphqlHTTP({
+    schema,
+    graphiql: true,
+  })
+);
+
+app.listen(process.env.PORT, async () => {
+  console.log(`🚀 Server running on http://localhost:${process.env.PORT}/graphql`);
+});
+
+export default app;
