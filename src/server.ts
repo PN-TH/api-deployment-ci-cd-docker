@@ -11,8 +11,8 @@ const app = express();
 app.use(cors());
 
 // Test
-app.get("/", (_, res) => {
-  res.send("Hello");
+app.use("/", (req, res) => {
+  res.send("Hello World");
 });
 
 app.use(
