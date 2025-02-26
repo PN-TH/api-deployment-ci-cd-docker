@@ -1,0 +1,44 @@
+name: 🚀 Déploiement Automatique
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v3
+ 
+      - name: 🔑 Configurer SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SERVER_USER: "user"  # Remplace par ton utilisateur SSH
+          SERVER_IP: "IP_DU_VPS"  # Remplace par ton IP VPS
+        run: |
+          echo "$SSH_PRIVATE_KEY" > private_key && chmod 600 private_key
+          ssh -i private_key -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "echo '✅ Connexion SSH réussie !'"
+
+      - name: Construire l'image Docker
+        run: docker build -t mon-api .
+
+      - name: Envoyer l'image Docker sur le serveur
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+        run: |
+          echo "$SSH_PRIVATE_KEY" > private_key && chmod 600 private_key
+          scp -i private_key docker-compose.yml $SERVER_USER@$SERVER_IP:/home/$SERVER_USER/app/
+          ssh -i private_key $SERVER_USER@$SERVER_IP "
+            cd /home/$SERVER_USER/app &&
+            docker-compose down &&
+            docker-compose pull &&
+            docker-compose up -d --build
+          "
+
+      - name: 🧹 Nettoyer la clé SSH
+        run: rm -f private_key

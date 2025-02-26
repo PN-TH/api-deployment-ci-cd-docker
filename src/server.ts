@@ -10,6 +10,11 @@ dotenv.config();
 const app = express();
 app.use(cors());
 
+// Test
+app.get("/", (_, res) => {
+  res.send("Hello");
+});
+
 app.use(
   "/graphql",
   graphqlHTTP({
