@@ -1,0 +1,31 @@
+name: Test CI/CD Local
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v3
+
+      - name: Installer Docker et Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker.io docker-compose
+
+      - name: Lancer le projet avec Docker Compose
+        run: |
+          docker-compose up -d --build
+          sleep 10  # Attendre que la base MySQL démarre
+          docker-compose exec api npx prisma db push
+
+      - name: Tester si l’API est bien en ligne
+        run: curl -X POST http://localhost:4000/graphql -H "Content-Type: application/json" --data '{"query":"{__typename}"}'
+
+      - name: Arrêter les conteneurs après les tests
+        run: docker-compose down

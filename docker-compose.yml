@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql-container
+    restart: always
+    env_file: # 👈 Utilise le fichier `.env`
+      - .env
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  api:
+    build: .
+    container_name: graphql-api
+    restart: always
+    depends_on:
+      - db
+    env_file: # 👈 Utilise aussi `.env`
+      - .env
+    environment:
+      DATABASE_URL: "mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@db:3306/${MYSQL_DATABASE}"
+    ports:
+      - "4000:4000"
+    command: sh -c "npx prisma db push && npm run start"
+
+volumes:
+  mysql-data:
