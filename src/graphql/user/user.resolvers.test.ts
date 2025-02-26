@@ -1,5 +1,5 @@
 
-import { prismaMock } from "../../../singleton";
+import { prismaMock } from "../../tests/singleton";
 import { userResolvers } from "./user.resolvers";
 
 describe.only("🔍 Test des resolvers User (Unit Tests)", () => {
