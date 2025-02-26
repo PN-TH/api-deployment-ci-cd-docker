@@ -13,6 +13,11 @@ jobs:
       - name: Récupérer le code
         uses: actions/checkout@v3
 
+      - name: 🔑 Tester la connexion SSH
+        run: |
+          echo "$SSH_PRIVATE_KEY" > private_key && chmod 600 private_key
+          ssh -i private_key -o StrictHostKeyChecking=no user@51.255.X.X "echo '✅ Connexion SSH réussie !'"
+
       - name: 🔑 Configurer SSH
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
