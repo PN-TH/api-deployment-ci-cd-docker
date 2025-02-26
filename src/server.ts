@@ -12,7 +12,8 @@ app.use(cors());
 
 // Test
 app.use("/", (req, res) => {
-  res.send("HEY");
+  res.send("HEY2");
+
 });
 
 app.use(
