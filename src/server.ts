@@ -12,7 +12,7 @@ app.use(cors());
 
 // Test
 app.use("/", (req, res) => {
-  res.send("Hello Louis");
+  res.send("HEY");
 });
 
 app.use(
