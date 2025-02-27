@@ -18,6 +18,8 @@ jobs:
           chmod 600 private_key
           ls -la private_key
           cat private_key | head -n 5
+      - name: 🔍 Debug SSH_PRIVATE_KEY_BASE64
+        run: echo "$SSH_PRIVATE_KEY_BASE64" | head -c 10
 
       - name: 🔍 Debug contenu de SSH_PRIVATE_KEY
         run: echo "$SSH_PRIVATE_KEY" | head -n 5
