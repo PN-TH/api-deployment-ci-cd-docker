@@ -45,18 +45,18 @@ jobs:
         env:
           SERVER_IP: ${{ secrets.SERVER_IP }}
 
-      - name: 📌 Nettoyer et formater `SERVER_IP`
+      - name: 🛠️ Vérifier et créer le dossier sur le VPS
         run: |
-          export SERVER_IP_CLEAN=$(echo "$SERVER_IP" | tr -d '[:space:]')
-          echo "🛠️ SERVER_IP_CLEAN: '$SERVER_IP_CLEAN'"
-          echo "SERVER_IP_CLEAN=$SERVER_IP_CLEAN" >> $GITHUB_ENV
+          ssh -i private_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SERVER_USER@$SERVER_IP "mkdir -p /home/$SERVER_USER/app/"
         env:
+          SERVER_USER: ${{ secrets.SERVER_USER }}
           SERVER_IP: ${{ secrets.SERVER_IP }}
 
       - name: 📂 Copier les fichiers sur le serveur
         run: |
-          scp -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i private_key docker-compose.yml $SERVER_USER@$SERVER_IP_CLEAN:/home/$SERVER_USER/app/
+          scp -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i private_key docker-compose.yml $SERVER_USER@$SERVER_IP:/home/$SERVER_USER/app/
         env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
           SERVER_USER: ${{ secrets.SERVER_USER }}
 
       - name: 🔍 Tester la connexion SSH avant `scp`
