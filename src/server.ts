@@ -20,9 +20,7 @@ app.use(
   })
 );
 
-app.use("/", (req, res) => {
-  res.send("Bonjour !");
-});
+
 app.listen(process.env.PORT, async () => {
   console.log(`🚀 Server running on http://localhost:${process.env.PORT}/graphql`);
 });
