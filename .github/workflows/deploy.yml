@@ -12,6 +12,12 @@ jobs:
     steps:
       - name: 🔍 Debug SSH_PRIVATE_KEY
         run: echo "$SSH_PRIVATE_KEY" | wc -l
+      - name: 🔑 Générer la clé privée depuis Base64
+        run: |
+          echo "$SSH_PRIVATE_KEY_BASE64" | base64 --decode > private_key
+          chmod 600 private_key
+          ls -la private_key
+          cat private_key | head -n 5
 
       - name: 🔍 Debug contenu de SSH_PRIVATE_KEY
         run: echo "$SSH_PRIVATE_KEY" | head -n 5
