@@ -32,7 +32,8 @@ jobs:
           SERVER_USER: ${{ secrets.SERVER_USER }}
       - name: 🔍 Tester la connexion SSH avant `scp`
         run: |
-          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i private_key $SERVER_USER@$SERVER_IP "echo '✅ Connexion SSH OK !'"
+          ssh -o StrictHostKeyChecking=no -o UserKnow
+          
       - name: 🔍 Debug SERVER_IP
         run: echo "SERVER_IP is set to: $SERVER_IP"
         env:
