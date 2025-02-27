@@ -12,6 +12,7 @@ jobs:
     steps:
       - name: Récupérer le code
         uses: actions/checkout@v3
+
       - name: 🔑 Générer la clé privée
         run: |
           echo "$SSH_PRIVATE_KEY" | tr -d '\r' > private_key
@@ -21,69 +22,43 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
+      - name: 🛠️ Vérification de la connexion SSH
+        run: ssh -i private_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SERVER_USER@$SERVER_IP "echo '✅ Connexion SSH réussie !'"
+        env:
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+
       - name: Construire l'image Docker
         run: docker build -t mon-api .
 
-      - name: 🔍 Debug SSH Variables
-        run: |
-          echo "SERVER_USER: $SERVER_USER"
-          echo "SERVER_IP: $SERVER_IP"
+      - name: 🛠️ Vérification et création du dossier distant
+        run: ssh -i private_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SERVER_USER@$SERVER_IP "mkdir -p /home/$SERVER_USER/app/"
         env:
           SERVER_USER: ${{ secrets.SERVER_USER }}
           SERVER_IP: ${{ secrets.SERVER_IP }}
 
-      - name: 🔍 Tester la connexion SSH
-        run: |
-          ssh -vvv -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i private_key $SERVER_USER@$SERVER_IP "echo '✅ Connexion SSH réussie !'"
+      - name: 📂 Transfert du fichier docker-compose.yml
+        run: scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i private_key docker-compose.yml $SERVER_USER@$SERVER_IP:/home/$SERVER_USER/app/
         env:
           SERVER_USER: ${{ secrets.SERVER_USER }}
           SERVER_IP: ${{ secrets.SERVER_IP }}
 
-      - name: 🔍 Vérifier la valeur de `SERVER_IP`
-        run: |
-          echo "🚀 SERVER_IP: '$SERVER_IP'"
-        env:
-          SERVER_IP: ${{ secrets.SERVER_IP }}
-
-      - name: 🛠️ Vérifier et créer le dossier sur le VPS
-        run: |
-          ssh -i private_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SERVER_USER@$SERVER_IP "mkdir -p /home/$SERVER_USER/app/"
+      - name: 🛠️ Vérification des fichiers transférés sur le serveur
+        run: ssh -i private_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SERVER_USER@$SERVER_IP "ls -la /home/$SERVER_USER/app/"
         env:
           SERVER_USER: ${{ secrets.SERVER_USER }}
           SERVER_IP: ${{ secrets.SERVER_IP }}
 
-      - name: 📂 Copier les fichiers sur le serveur
-        run: |
-          scp -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i private_key docker-compose.yml $SERVER_USER@$SERVER_IP:/home/$SERVER_USER/app/
+      - name: 🚀 Déploiement avec Docker Compose
+        run:
+          ssh -i private_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SERVER_USER@$SERVER_IP "
+          cd /home/$SERVER_USER/app || exit 1
+          docker-compose down || true
+          docker-compose pull || exit 1
+          docker-compose up -d --build || exit 1
         env:
-          SERVER_IP: ${{ secrets.SERVER_IP }}
-          SERVER_USER: ${{ secrets.SERVER_USER }}
-
-      - name: 🔍 Tester la connexion SSH avant `scp`
-        run: |
-          ssh -o StrictHostKeyChecking=no -o UserKnow
-
-      - name: 📂 Copier les fichiers sur le serveur
-        run: |
-          scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i private_key docker-compose.yml $SERVER_USER@$SERVER_IP:/home/$SERVER_USER/app/
-        env:
-          SERVER_IP: ${{ secrets.SERVER_IP }}
-          SERVER_USER: ${{ secrets.SERVER_USER }}
-
-      - name: Envoyer l'image Docker sur le serveur
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           SERVER_USER: ${{ secrets.SERVER_USER }}
           SERVER_IP: ${{ secrets.SERVER_IP }}
-        run: |
-          echo "$SSH_PRIVATE_KEY" > private_key && chmod 600 private_key
-          scp -i private_key docker-compose.yml $SERVER_USER@$SERVER_IP:/home/$SERVER_USER/app/
-          ssh -i private_key $SERVER_USER@$SERVER_IP "
-            cd /home/$SERVER_USER/app &&
-            docker-compose down &&
-            docker-compose pull &&
-            docker-compose up -d --build
-          "
 
       - name: 🧹 Nettoyer la clé SSH
         run: rm -f private_key
