@@ -10,61 +10,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🔍 Vérifier la présence des secrets
-        run: |
-          echo "SSH_PRIVATE_KEY set: ${SSH_PRIVATE_KEY:+YES}" 
-          echo "SERVER_IP set: ${SERVER_IP:+YES}"
-          echo "SERVER_USER set: ${SERVER_USER:+YES}"
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SERVER_IP: ${{ secrets.SERVER_IP }}
-          SERVER_USER: ${{ secrets.SERVER_USER }}
-      - name: 🔑 Configurer SSH
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        run: |
-          echo "$SSH_PRIVATE_KEY" | base64 | head -c 10
-
-      - name: 🔍 Debug SSH_PRIVATE_KEY
-        run: echo "$SSH_PRIVATE_KEY" | wc -l
-      - name: 🔑 Générer la clé privée depuis Base64
-        run: |
-          echo "$SSH_PRIVATE_KEY_BASE64" | base64 --decode > private_key
-          chmod 600 private_key
-          ls -la private_key
-          cat private_key | head -n 5
-      - name: 🔍 Debug SSH_PRIVATE_KEY_BASE64
-        run: echo "$SSH_PRIVATE_KEY_BASE64" | head -c 10
-
-      - name: 🔍 Debug contenu de SSH_PRIVATE_KEY
-        run: echo "$SSH_PRIVATE_KEY" | head -n 5
-      - name: 🛠️ Vérifier si private_key existe
-        run: |
-          ls -la private_key
-          cat private_key | head -n 5
-
-      - name: 🔑 Générer le fichier private_key
-        run: |
-          echo -e "$SSH_PRIVATE_KEY" | sed 's/\r$//' > private_key
-          chmod 600 private_key
-          ls -la private_key
-          cat private_key | head -n 5
-
       - name: Récupérer le code
         uses: actions/checkout@v3
-      - name: 🛠️ Debug SSH Connection
+      - name: 🔑 Générer la clé privée
         run: |
-          echo -e "$SSH_PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -vvv -i private_key -o StrictHostKeyChecking=no -o IdentitiesOnly=yes $SERVER_USER@$SERVER_IP "echo '✅ Connexion SSH réussie !'"
-
-      - name: 🔑 Configurer SSH
+          echo "$SSH_PRIVATE_KEY" | tr -d '\r' > private_key
+          chmod 600 private_key
+          ls -la private_key
+          cat private_key | head -n 5
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SERVER_USER: ${{ secrets.SERVER_USER }}
-          SERVER_IP: ${{ secrets.SERVER_IP }}
-        run: |
-          echo "$SSH_PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -i private_key -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "echo '✅ Connexion SSH réussie !'"
 
       - name: Construire l'image Docker
         run: docker build -t mon-api .
