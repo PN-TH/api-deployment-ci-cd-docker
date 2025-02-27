@@ -12,6 +12,15 @@ jobs:
     steps:
       - name: 🔍 Debug SSH_PRIVATE_KEY
         run: echo "$SSH_PRIVATE_KEY" | wc -l
+      - name: 🛠️ Vérifier si private_key existe
+        run: |
+          ls -la private_key
+          cat private_key | head -n 5
+
+      - name: 🛠️ Debug SSH Connection
+        run: |
+          echo "$SSH_PRIVATE_KEY" | tr -d '\r' > private_key && chmod 600 private_key
+          ssh -v -i private_key -o StrictHostKeyChecking=no -o IdentitiesOnly=yes "$SERVER_USER@$SERVER_IP" "echo '✅ Connexion SSH réussie !'"
 
       - name: Récupérer le code
         uses: actions/checkout@v3
