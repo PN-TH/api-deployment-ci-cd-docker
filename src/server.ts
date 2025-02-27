@@ -10,11 +10,7 @@ dotenv.config();
 const app = express();
 app.use(cors());
 
-// Test
-app.use("/", (req, res) => {
-  res.send("HEY2");
 
-});
 
 app.use(
   "/graphql",
@@ -24,6 +20,9 @@ app.use(
   })
 );
 
+app.use("/", (req, res) => {
+  res.send("Bonjour");
+});
 app.listen(process.env.PORT, async () => {
   console.log(`🚀 Server running on http://localhost:${process.env.PORT}/graphql`);
 });
