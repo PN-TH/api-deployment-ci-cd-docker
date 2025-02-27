@@ -24,6 +24,14 @@ jobs:
       - name: Construire l'image Docker
         run: docker build -t mon-api .
 
+      - name: 🔍 Debug SSH Variables
+        run: |
+          echo "SERVER_USER: $SERVER_USER"
+          echo "SERVER_IP: $SERVER_IP"
+        env:
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+
       - name: 🔍 Tester la connexion SSH avant `scp`
         run: |
           ssh -o StrictHostKeyChecking=no -o UserKnow
