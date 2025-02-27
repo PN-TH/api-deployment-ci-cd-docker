@@ -10,6 +10,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: 🔍 Vérifier la présence des secrets
+        run: |
+          echo "SSH_PRIVATE_KEY set: ${SSH_PRIVATE_KEY:+YES}" 
+          echo "SERVER_IP set: ${SERVER_IP:+YES}"
+          echo "SERVER_USER set: ${SERVER_USER:+YES}"
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+
       - name: 🔍 Debug SSH_PRIVATE_KEY
         run: echo "$SSH_PRIVATE_KEY" | wc -l
       - name: 🔑 Générer la clé privée depuis Base64
