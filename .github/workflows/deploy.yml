@@ -24,16 +24,21 @@ jobs:
       - name: Construire l'image Docker
         run: docker build -t mon-api .
 
+      - name: 🔍 Tester la connexion SSH avant `scp`
+        run: |
+          ssh -o StrictHostKeyChecking=no -o UserKnow
+
+      - name: 🔍 Debug SERVER_IP
+        run: echo "SERVER_IP is set to: $SERVER_IP"
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+
       - name: 📂 Copier les fichiers sur le serveur
         env:
           SERVER_IP: ${{ secrets.SERVER_IP }}
           SERVER_USER: ${{ secrets.SERVER_USER }}
         run: |
           scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i private_key docker-compose.yml $SERVER_USER@$SERVER_IP:/home/$SERVER_USER/app/
-
-      - name: 🔍 Tester la connexion SSH avant `scp`
-        run: |
-          ssh -o StrictHostKeyChecking=no -o UserKnow
 
       - name: Envoyer l'image Docker sur le serveur
         env:
