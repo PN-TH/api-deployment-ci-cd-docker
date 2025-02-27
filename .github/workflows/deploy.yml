@@ -12,10 +12,13 @@ jobs:
     steps:
       - name: Récupérer le code
         uses: actions/checkout@v3
+      - name: 🔍 Debug Clé SSH
+        run: cat private_key
       - name: 🛠️ Debug SSH Connection
         run: |
-          echo "$SSH_PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -v -i private_key -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "echo '✅ Connexion SSH réussie !'"
+          echo -e "${SSH_PRIVATE_KEY//_/\\n}" > private_key && chmod 600 private_key
+          ssh -vvv -i private_key -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "echo '✅ Connexion SSH réussie !'"
+
       - name: 🔑 Configurer SSH
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
