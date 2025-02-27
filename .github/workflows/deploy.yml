@@ -33,11 +33,6 @@ jobs:
       - name: 🔍 Tester la connexion SSH avant `scp`
         run: |
           ssh -o StrictHostKeyChecking=no -o UserKnow
-          
-      - name: 🔍 Debug SERVER_IP
-        run: echo "SERVER_IP is set to: $SERVER_IP"
-        env:
-          SERVER_IP: ${{ secrets.SERVER_IP }}
 
       - name: Envoyer l'image Docker sur le serveur
         env:
