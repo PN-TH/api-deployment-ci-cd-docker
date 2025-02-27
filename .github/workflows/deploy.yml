@@ -27,7 +27,9 @@ jobs:
       - name: 📂 Copier les fichiers sur le serveur
         run: |
           scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i private_key docker-compose.yml $SERVER_USER@$SERVER_IP:/home/$SERVER_USER/app/
-
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
       - name: 🔍 Tester la connexion SSH avant `scp`
         run: |
           ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i private_key $SERVER_USER@$SERVER_IP "echo '✅ Connexion SSH OK !'"
